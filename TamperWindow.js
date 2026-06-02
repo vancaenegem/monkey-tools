@@ -27,6 +27,7 @@ class TamperWindow extends HTMLElement {
 
 customElements.define("tamper-window", TamperWindow);
 setTimeout(()=>{
+  console.log ('%cTamperMonkey : init window', 'color: green;');
   const tamperWin = document.createElement("tamper-window");
   document.body.appendChild(tamperWin);
 }, 1000);
