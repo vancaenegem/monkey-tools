@@ -2,7 +2,7 @@
 
 ## Tamper Window
 
-![TamperWindow](img/TamperWindow.jpg)
+![TamperWindow](TamperWindow.jpg)
 
 ### Header comments in the TamperMonkey script
 ```diff
