@@ -198,8 +198,14 @@ _bindDrag() {
 
   
   log(htmlContent) {
-      this._content.insertAdjacentHTML('afterbegin', htmlContent);
-  }
+        const now = new Date().toLocaleTimeString();
+        this._content.insertAdjacentHTML('beforeend',
+                                         `<div style="display:flex;gap:8px;margin-bottom:2px">
+                                            <span style="opacity:.6;font-size:.85em;white-space:nowrap;flex-shrink:0">[${now}]</span>
+                                            <span style="flex:1;min-width:0">${htmlContent}</span>
+                                        </div>`);
+        this._content.scrollTop = this._content.scrollHeight;
+    }
 }
 
 customElements.define("tamper-window", TamperWindow);
