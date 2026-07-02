@@ -111,19 +111,19 @@ class TamperWindow extends HTMLElement {
   }
 
   disconnectedCallback() {
-    console.log("Custom element removed from page.");
+    //console.log("Custom element removed from page.");
   }
 
   connectedMoveCallback() {
-    console.log("Custom element moved with moveBefore()");
+    //console.log("Custom element moved with moveBefore()");
   }
 
   adoptedCallback() {
-    console.log("Custom element moved to new page.");
+    //console.log("Custom element moved to new page.");
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-      console.log(`Attribute ${name} has changed.`);
+      //console.log(`Attribute ${name} has changed.`);
   }
 
 
@@ -209,3 +209,11 @@ _bindDrag() {
 }
 
 customElements.define("tamper-window", TamperWindow);
+
+function addTamperWindow(id = null) {
+    console.log ('%cTamperMonkey : add window', 'color: green;');
+    const tamperWin = document.createElement("tamper-window");
+    if (id !== null) tamperWin.setAttribute ('id', id);
+    document.body.appendChild(tamperWin);
+    return tamperWin;
+}
