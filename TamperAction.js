@@ -12,15 +12,17 @@ class TamperAction {
    * @param {number} afterDelay - Délai final en millisecondes après l'action.
    */
   constructor(action, beforeDelay = 0, afterDelay = 0, afterFunction = null) {
+     this.action = action;
+     this.beforeDelay = beforeDelay;
+     this.afterDelay = afterDelay;
+     this.afterDelay = afterFunction;
       switch (typeof(action)) {
-          case 'function':
-             this.action = action;
-             this.beforeDelay = beforeDelay;
-             this.afterDelay = afterDelay;
-             break;
           case 'object':
              Object.keys(action).forEach(key=>{ this[key] = action[key];})
              break;
+        default:
+            // Par defaut, this.action est une fonction.
+          break;
       }
   }
 
@@ -56,11 +58,11 @@ class TamperAction {
    * @param {Function} action - Fonction à exécuter.
    * @returns {Promise<void>}
    */
-  async run() {
+  async run(...args) {
     await this.wait(this.beforeDelay);
-    let retour = this.action();
+    let retour = this.action(...args);
     await this.wait(this.afterDelay);
-      if (this.afterFunction) {
+      if (this.afterFunction) { // Si this.afterFunction est définie, on attend que cette dernière renvoie 'true'
           await new Promise((resolve) => {
               const check = async () => {
                   if (await this.afterFunction(retour)) {
