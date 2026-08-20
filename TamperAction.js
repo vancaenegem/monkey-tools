@@ -11,11 +11,12 @@ class TamperAction {
    * @param {number} beforeDelay - Délai initial en millisecondes avant l'action.
    * @param {number} afterDelay - Délai final en millisecondes après l'action.
    */
-  constructor(action, beforeDelay = 0, afterDelay = 0, afterFunction = null) {
+  constructor(action, beforeDelay = 0, afterDelay = 0, beforeFunction = null, afterFunction = null) {
      this.action = action;
      this.beforeDelay = beforeDelay;
+     this.beforeFunction = beforeFunction;
      this.afterDelay = afterDelay;
-     this.afterDelay = afterFunction;
+     this.afterFunction = afterFunction;
       switch (typeof(action)) {
           case 'object':
              Object.keys(action).forEach(key=>{ this[key] = action[key];})
@@ -54,27 +55,43 @@ class TamperAction {
   }
 
   /**
+   * Attend qu'une fonction de condition renvoie 'true', en réessayant après un délai.
+   * @param {Function} conditionFunction - Fonction à tester (peut être async).
+   * @param {*} arg - Argument éventuellement passé à la fonction de condition.
+   * @param {number} delay - Délai entre chaque tentative.
+   * @returns {Promise<void>}
+   */
+  async waitUntil(conditionFunction, arg, delay) {
+      return new Promise((resolve) => {
+          const check = async () => {
+              if (await conditionFunction(arg)) {
+                  resolve();
+              } else {
+                  await this.wait(delay);
+                  check();
+              }
+          };
+          check();
+      });
+  }
+
+  /**
    * Exécute une action après un délai initial, puis attend un délai final.
    * @param {Function} action - Fonction à exécuter.
    * @returns {Promise<void>}
    */
   async run(...args) {
     await this.wait(this.beforeDelay);
+    if (this.beforeFunction) { // Si this.beforeFunction est définie, on attend qu'elle renvoie 'true' avant d'exécuter l'action
+        await this.waitUntil(this.beforeFunction, undefined, this.beforeDelay);
+    }
+
     let retour = this.action(...args);
+    
     await this.wait(this.afterDelay);
-      if (this.afterFunction) { // Si this.afterFunction est définie, on attend que cette dernière renvoie 'true'
-          await new Promise((resolve) => {
-              const check = async () => {
-                  if (await this.afterFunction(retour)) {
-                      resolve();
-                  } else {
-                      await this.wait(this.afterDelay);
-                      check();
-                  }
-              };
-              check();
-          });
-      }
-      return retour;
+    if (this.afterFunction) { // Si this.afterFunction est définie, on attend que cette dernière renvoie 'true'
+        await this.waitUntil(this.afterFunction, retour, this.afterDelay);
+    }
+    return retour;
   }
 }
